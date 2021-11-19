@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import time
+import sys
+import random
 from enum import Enum
 
 class Version(Enum):
@@ -50,16 +53,14 @@ def add_to_list(index, from_old):
     current_code = berton_old["Code"][index] if from_old else berton_new["Code"][index] 
     current_hand = berton_old["On Hand"][index] if from_old else berton_new["On Hand"][index]
     current_restock = berton_old["Estimated Restocking Date"][index] if from_old else berton_new["Estimated Restocking Date"][index]
+    current_des = berton_old["Description"][index] if from_old else berton_new["Description"][index]
     print(current_code)
     code.append(current_code)
-    des.append(berton_new["Description"][index])
+    des.append(current_des)
     hand.append(current_hand)
     restock.append(current_restock)
     version.append(Version.OLD.value if from_old else Version.NEW.value)
     
-
-# TODO
-#      - if old list has ETA, add both old and new
 def find_listing():
     global berton_new,berton_old,code,des,hand,restock
     i = len(berton_new["Code"])
@@ -111,9 +112,54 @@ def create_excel():
             print("Make sure you don't have the output file opened.")
             input("Press any key to retry...")
 
-get_excels()
-find_listing()
-create_excel()
+def edit_excel():
+    try:
+        writer = pd.ExcelWriter("./ouput.xlsx", engine='xlsxwriter')
+    except FileNotFoundError as error:
+        print(error)
+        return
+
+def replace():
+    size = 10
+    true_output = ""
+    for j in range(10000):         
+        output = true_output
+        for i in range(size):
+            output = output + chr(random.randint(65,90))
+            sys.stdout.write(output + "\r" if j != 10000 else "")
+            if j != 10000:
+                sys.stdout.flush()
+        if j % 1000 == 0:
+            true_output = true_output + chr(random.randint(65,90))
+            size = size - 1
+    sys.stdout.write(true_output+"\n")
+
+def select_service():
+    while True:
+        print("===========================================")
+        print("|       Berton Stock Update Service       |")
+        print("|       1. Get combined list              |")
+        print("|       2. Apply Spreadsheet style        |")
+        print("|       3. Replace                        |")
+        print("===========================================\n")
+        service = input("Select the service you need: ")
+        match service:
+            case "1":
+                get_excels()
+                find_listing()
+                create_excel()
+                return     
+            case "2":
+                print("Service not available!")
+                break
+            case "3":
+                replace()
+                break
+            case _:
+                print("Invalid Input!!!\n")
+            
+
+select_service()
 #berton = pd.read_excel("./tips.xlsx", index_col=0)
 #berton = pd.read_excel("./berton05112021.xlsx")
 #print(len(berton["Code"]))
