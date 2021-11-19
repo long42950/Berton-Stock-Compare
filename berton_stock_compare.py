@@ -4,6 +4,7 @@ import time
 import sys
 import random
 from enum import Enum
+from termcolor import colored
 
 class Version(Enum):
     OLD = "Old"
@@ -54,7 +55,7 @@ def add_to_list(index, from_old):
     current_hand = berton_old["On Hand"][index] if from_old else berton_new["On Hand"][index]
     current_restock = berton_old["Estimated Restocking Date"][index] if from_old else berton_new["Estimated Restocking Date"][index]
     current_des = berton_old["Description"][index] if from_old else berton_new["Description"][index]
-    print(current_code)
+    check_progress(index)
     code.append(current_code)
     des.append(current_des)
     hand.append(current_hand)
@@ -105,7 +106,7 @@ def create_excel():
     while True:
         try:
             new.to_excel("./output.xlsx", sheet_name="Berton Stocks")
-            print("New excel generated!!!")
+            print("New excel generated.")
             return
         except PermissionError as error:
             print(error)
@@ -125,7 +126,7 @@ def replace():
     for j in range(10000):         
         output = true_output
         for i in range(size):
-            output = output + chr(random.randint(65,90))
+            output = output + chr(random.randint(33,100))
             sys.stdout.write(output + "\r" if j != 10000 else "")
             if j != 10000:
                 sys.stdout.flush()
@@ -134,29 +135,48 @@ def replace():
             size = size - 1
     sys.stdout.write(true_output+"\n")
 
+def check_progress(index):
+    size = len(berton_new["Code"])
+    output = str(index)+" out of " + str(size) + " product checked..."
+    sys.stdout.write(output+"\r" if index != size else "")
+    sys.stdout.flush()
+    
+
+def percentage():
+    size = 250000
+    for i in range(size):
+        progress = i / size * 100
+        output = str(i)+" out of " + str(size) + " product checked..."
+        sys.stdout.write(output+"\r" if i != size else "")
+        if i != size:
+                sys.stdout.flush()         
+    print("All products checked...")   
+
 def select_service():
     while True:
-        print("===========================================")
-        print("|       Berton Stock Update Service       |")
-        print("|       1. Get combined list              |")
-        print("|       2. Apply Spreadsheet style        |")
-        print("|       3. Replace                        |")
-        print("===========================================\n")
+        print("                 ===========================================")
+        print("                 |       Berton Stock Update Service       |")
+        print("                 |       1. Get combined list              |")
+        print("-----------------|       2. Apply Spreadsheet style        |-----------------")
+        print("                 |       3. Replace                        |")
+        print("                 |       4. Percentage                     |")
+        print("                 ===========================================\n")
         service = input("Select the service you need: ")
         match service:
             case "1":
                 get_excels()
                 find_listing()
+                print("All product has been checked.    ")
                 create_excel()
-                return     
+                input("Press any Key to continue.")     
             case "2":
-                print("Service not available!")
-                break
+                print("Service not available!")                
             case "3":
-                replace()
-                break
+                replace()                
+            case "4":
+                percentage()                
             case _:
-                print("Invalid Input!!!\n")
+                print(colored("Invalid Input!!!\n", 'red'))
             
 
 select_service()
@@ -164,6 +184,5 @@ select_service()
 #berton = pd.read_excel("./berton05112021.xlsx")
 #print(len(berton["Code"]))
 #create_excel()
-input("Press any Key to continue.")
 
 
